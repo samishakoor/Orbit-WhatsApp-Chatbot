@@ -1,9 +1,8 @@
 import json
 import threading
-from fastapi import APIRouter, HTTPException, Query, Request, requests
-
+from fastapi import APIRouter, HTTPException, Query, Request
+import requests
 from app.core.config import settings
-
 
 router = APIRouter()
 
@@ -30,6 +29,8 @@ async def verify_whatsapp(
 
 
 def send_whatsapp_message(to, message, template=True):
+    print("Sending WhatsApp message to", to)
+    print("Message:", message)
     url = (
         f"https://graph.facebook.com/v22.0/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
     )
@@ -75,7 +76,8 @@ async def receive_whatsapp(request: Request):
         text = msg.get("text", {}).get("body")
         print(f"✅ Message received from {from_number}: {text}")
         thread = threading.Thread(
-            target=send_whatsapp_message, args=(from_number, "Hello Sami, how are you?")
+            target=send_whatsapp_message,
+            args=(from_number, "Hello Sami, how are you?", False),
         )
         thread.daemon = True
         thread.start()
