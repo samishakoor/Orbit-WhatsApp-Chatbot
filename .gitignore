@@ -191,7 +191,7 @@ logs/
 
 # uv specific
 .uv/
-uv.lock
+# uv.lock
 
 # Alembic
 alembic/versions/*.py
