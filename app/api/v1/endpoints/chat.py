@@ -1,15 +1,21 @@
 import json
 import logging
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Query, requests
+from fastapi import APIRouter, Depends, HTTPException, Query, requests, status
 from app.ai.dependencies import ChatServiceDep
-from app.core.dependencies import get_conversation_service, get_message_sender, message_extractor
+from app.core.dependencies import (
+    get_conversation_service,
+    get_message_sender,
+    message_extractor,
+)
 from app.core.config import settings
+from app.schemas.chat import Message, StatusResponse
 from app.services.conversation_service import ConversationService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
 
 @router.get("/")
 async def verify_whatsapp(
@@ -32,7 +38,7 @@ async def verify_whatsapp(
     raise HTTPException(status_code=403, detail="Invalid verification token")
 
 
-def send_whatsapp_message(to, message, template=True):
+def send_whatsapp_message(to, message, template=False):
     print("Sending WhatsApp message to", to)
     print("Message:", message)
     url = (
@@ -63,50 +69,45 @@ def send_whatsapp_message(to, message, template=True):
     return response.json()
 
 
-# @router.post("/", status_code=200)
-# async def receive_whatsapp(request: Request):
-#     payload = await request.json()
-#     print("📩 Incoming WhatsApp Webhook Payload:", json.dumps(payload, indent=2))
-
-#     # Extract message
-#     entry = payload.get("entry", [])[0]
-#     changes = entry.get("changes", [])[0]
-#     value = changes.get("value", {})
-#     messages = value.get("messages", [])
-
-#     if messages:
-#         msg = messages[0]
-#         from_number = msg["from"]  # sender's phone
-#         text = msg.get("text", {}).get("body")
-#         print(f"✅ Message received from {from_number}: {text}")
-#         thread = threading.Thread(
-#             target=send_whatsapp_message,
-#             args=(from_number, "Hello Sami, how are you?", False),
-#         )
-#         thread.daemon = True
-#         thread.start()
-
-#     return {"status": "ok"}
-
-
-
-@router.post("/", status_code=200)
-async def receive_whatsapp(
-    sender: Annotated[str, Depends(get_message_sender)],
-    sender_message: Annotated[str, Depends(message_extractor)],
+@router.post("/", status_code=200, response_model=StatusResponse)
+async def receive_whatsapp_message(
+    current_sender: Annotated[str, Depends(get_message_sender)],
+    message: Annotated[Message, Depends(message_extractor)],
     chat_service: ChatServiceDep,
-    conversation_service: Annotated[ConversationService, Depends(get_conversation_service)]
+    conversation_service: Annotated[
+        ConversationService, Depends(get_conversation_service)
+    ],
 ):
-    print(f"User: {sender}")
-    print(f"User message: {sender_message}")
-    if not sender and not sender_message:
-        return {"status": "ok"}
+    if not current_sender and not message:
+        return StatusResponse(status="OK")
 
-    if not sender:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    if sender_message:
-        print(
-            f"Received message from user {sender}: ({sender_message})"
+    if not current_sender:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized"
         )
-    return {"status": "ok"}
+
+    if message:
+        logger.info(
+            f"[CHAT_ENDPOINT] Received message from user {current_sender}: {message}"
+        )
+
+        # Step 1: Get or create conversation through business service
+        conversation = conversation_service.get_or_create_conversation(
+            sender_id=current_sender,
+        )
+
+        # Step 2: Send message through AI service
+        await chat_service.send_message(
+            message=message,
+            sender=current_sender,
+            thread_id=conversation.thread_id,
+        )
+
+        # Step 3: Update conversation metadata
+        conversation_service.update_conversation_metadata(
+            conversation_id=conversation.id,
+            sender_id=current_sender,
+            message_count_increment=2,  # User message + AI response
+        )
+
+    return StatusResponse(status="OK")

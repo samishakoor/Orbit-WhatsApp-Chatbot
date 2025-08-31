@@ -7,7 +7,7 @@ from app.core.guards.authorization_guard import AuthGuardDep
 from app.db.dependencies import get_db
 from app.models.user import User
 from app.schemas.auth import TokenData
-from app.schemas.chat import Audio, Image, Message, Payload
+from app.schemas.chat import Audio, Contact, Image, Message, MessageType, Payload
 from app.services.auth_service import AuthService
 from app.services.conversation_service import ConversationService
 from app.services.user_service import UserService
@@ -21,49 +21,31 @@ def parse_message(payload: Payload) -> Message | None:
     return payload.entry[0].changes[0].value.messages[0]
 
 
-def parse_audio_file(
-    message: Annotated[Message, Depends(parse_message)],
-) -> Audio | None:
-    if message and message.type == "audio":
-        return message.audio
-    return None
-
-
-def parse_image_file(
-    message: Annotated[Message, Depends(parse_message)],
-) -> Image | None:
-    if message and message.type == "image":
-        return message.image
-    return None
-
-
-def parse_text_message(
-    message: Annotated[Message, Depends(parse_message)],
-) -> str | None:
-    if message and message.type == "text":
-        return message.text.body
-    return None
-
 def message_extractor(
-    text_message: Annotated[str, Depends(parse_text_message)],
-    audio: Annotated[Audio, Depends(parse_audio_file)],
-    image: Annotated[Image, Depends(parse_image_file)],
-):
-    # if audio:
-    #     return message_service.transcribe_audio(audio)
-    # if image:
-    #     return message_service.get_base64_image(image)
-    if text_message:
-        return text_message
+    message: Annotated[Message, Depends(parse_message)],
+) -> Message | None:
+    if message:
+        if (
+            message.type == MessageType.TEXT
+            or message.type == MessageType.AUDIO
+            or message.type == MessageType.IMAGE
+        ):
+            return message
     return None
+
+
+def parse_contact(payload: Payload) -> Contact | None:
+    if not payload.entry[0].changes[0].value.contacts:
+        return None
+    return payload.entry[0].changes[0].value.contacts[0]
 
 
 def get_message_sender(
-    message: Annotated[Message, Depends(parse_message)],
-) -> User | None:
-    if not message:
+    contact: Annotated[Contact, Depends(parse_contact)],
+) -> str | None:
+    if not contact:
         return None
-    return message.from_
+    return contact.wa_id
 
 
 def get_conversation_service(

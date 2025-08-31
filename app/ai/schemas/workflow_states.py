@@ -11,5 +11,5 @@ class ChatState(BaseModel):
     Used for conversational chat with persistent message history.
     """
     messages: Annotated[Sequence[BaseMessage], add_messages]
-    resource_id: str
+    sender: str
     answer: str
