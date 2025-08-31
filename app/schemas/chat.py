@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Optional, List
 from pydantic import BaseModel, Field
 from pydantic import BaseModel, Field
@@ -19,6 +20,12 @@ class Audio(BaseModel):
     sha256: str
     id: str
     voice: bool
+
+
+class MessageType(str, Enum):
+    TEXT = "text"
+    IMAGE = "image"
+    AUDIO = "audio"
 
 
 class Message(BaseModel):
@@ -66,3 +73,7 @@ class Entry(BaseModel):
 class Payload(BaseModel):
     object: str
     entry: List[Entry]
+
+
+class StatusResponse(BaseModel):
+    status: str = Field(..., description="Status of the operation")

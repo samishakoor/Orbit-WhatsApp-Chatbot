@@ -6,7 +6,6 @@ that define the graph structure and return compiled applications.
 """
 
 from typing import Dict, Any
-from uuid import UUID
 from langgraph.graph import StateGraph, START, END
 from app.ai.nodes.chat_processor_node import chat_processor_node
 from app.ai.services.checkpointer_service import CheckpointerService
@@ -14,7 +13,6 @@ from app.ai.schemas.workflow_states import ChatState
 
 
 async def create_chat_workflow(
-    resource_id: UUID,
     checkpointer_service=None,
     async_mode: bool = False,
 ) -> StateGraph:
@@ -51,14 +49,14 @@ async def create_chat_workflow(
     # Log checkpointer type
     checkpointer_type = checkpointer_service.get_checkpointer_type(checkpointer)
     print(
-        f"[CHAT_WORKFLOW] Using {checkpointer_type} checkpointer for resource {resource_id}"
+        f"[CHAT_WORKFLOW] Using {checkpointer_type} checkpointer"
     )
 
     # Compile workflow with checkpointer
     # Note: For PostgreSQL checkpointers, LangGraph will handle the context manager
     app = workflow.compile(checkpointer=checkpointer)
 
-    print(f"[CHAT_WORKFLOW] Workflow compiled successfully for resource {resource_id}")
+    print(f"[CHAT_WORKFLOW] Workflow compiled successfully")
 
     return app
 
@@ -82,14 +80,14 @@ def validate_chat_input(input_data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Extract required fields
     message = input_data.get("message", "")
-    resource_id = input_data.get("resource_id")
+    sender = input_data.get("sender", "")
     thread_id = input_data.get("thread_id", "default")
 
     if not message:
         raise ValueError("Message is required")
 
-    if not resource_id:
-        raise ValueError("Resource ID is required")
+    if not sender:
+        raise ValueError("Sender is required")
 
     # Create human message for the current input
     human_message = {"role": "user", "content": message}
@@ -102,12 +100,12 @@ def validate_chat_input(input_data: Dict[str, Any]) -> Dict[str, Any]:
     state = {
         # This will be appended to existing messages
         "messages": [human_message],
-        "resource_id": str(resource_id),
+        "sender": sender,
         "answer": "",  # Initialize empty answer
     }
 
     print(
-        f"[CHAT_WORKFLOW] Prepared input state with {len(state['messages'])} messages for thread_id: {thread_id}"
+        f"[CHAT_WORKFLOW] Prepared input state with {len(state['messages'])} messages for sender: {sender}, thread_id: {thread_id}"
     )
     print(f"[CHAT_WORKFLOW] Human message content: {human_message['content'][:50]}...")
 

@@ -1,12 +1,11 @@
 """
 Chat service for AI chat operations and streaming.
 
-This service handles RAG-based chat functionality with conversation
+This service handles chat functionality with conversation
 persistence using LangGraph workflows.
 """
 
-from typing import Dict, Any, Optional, AsyncGenerator
-from uuid import UUID
+from typing import Dict, Any, Optional
 from langchain_core.messages import HumanMessage, AIMessage
 from app.ai.workflows.chat_workflow import (
     create_chat_workflow,
@@ -35,9 +34,9 @@ class ChatService:
         # Use singleton pattern for checkpointer service
         self._checkpointer_service = CheckpointerService()
 
-    async def _get_workflow(self, resource_id: UUID, async_mode: bool = False):
+    async def _get_workflow(self, async_mode: bool = False):
         """
-        Get or create RAG chat workflow for the resource.
+        Get or create chat workflow.
 
         Args:
             resource_id: Resource UUID
@@ -48,7 +47,7 @@ class ChatService:
         """
         try:
             print(
-                f"[CHAT_SERVICE] Creating {'async' if async_mode else 'sync'} workflow for resource {resource_id}"
+                f"[CHAT_SERVICE] Creating {'async' if async_mode else 'sync'} workflow"
             )
 
             # Reuse existing checkpointer service (singleton pattern)
@@ -57,31 +56,26 @@ class ChatService:
 
             # Create workflow with proper async/sync mode
             workflow = await create_chat_workflow(
-                resource_id=resource_id,
                 checkpointer_service=checkpointer_service,
                 async_mode=async_mode,  # Use proper async/sync mode
             )
 
-            print(
-                f"[CHAT_SERVICE] Workflow created successfully for resource {resource_id}"
-            )
+            print(f"[CHAT_SERVICE] Chat Workflow created successfully")
             return workflow
 
         except Exception as e:
-            print(
-                f"[CHAT_SERVICE] Failed to create workflow for resource {resource_id}: {str(e)}"
-            )
-            raise RuntimeError(f"Failed to create workflow: {str(e)}")
+            print(f"[CHAT_SERVICE] Failed to create chat workflow: {str(e)}")
+            raise RuntimeError(f"Failed to create chat workflow: {str(e)}")
 
     async def send_message(
-        self, resource_id: UUID, message: str, thread_id: Optional[str] = None
+        self, message: str, sender: str, thread_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Send a chat message and get AI response using RAG workflow.
 
         Args:
             resource_id: Resource UUID
-            message: User message
+            sender: sender phone number
             thread_id: Optional thread ID for conversation persistence
 
         Returns:
@@ -93,13 +87,13 @@ class ChatService:
         try:
 
             print(
-                f"[CHAT_SERVICE] Processing chat message for resource {resource_id}, thread {thread_id}"
+                f"[CHAT_SERVICE] Processing chat message for sender {sender} and thread {thread_id}"
             )
 
             # Prepare workflow input
             input_data = {
                 "message": message,
-                "resource_id": str(resource_id),
+                "sender": sender,
                 "thread_id": thread_id or "default",
             }
 
@@ -115,10 +109,10 @@ class ChatService:
             print(f"[CHAT_SERVICE] Config: {config}")
 
             # Get async workflow for regular chat (consistent with ainvoke)
-            workflow = await self._get_workflow(resource_id, async_mode=True)
+            workflow = await self._get_workflow(async_mode=True)
 
             # Execute workflow
-            print(f"[CHAT_SERVICE] Executing async workflow for resource {resource_id}")
+            print(f"[CHAT_SERVICE] Executing async workflow")
             result = await workflow.ainvoke(validated_input, config=config)
             # Extract response
             answer = result.get("answer", "")
@@ -136,18 +130,18 @@ class ChatService:
                 ai_message = AIMessage(content=answer)
 
             print(
-                f"[CHAT_SERVICE] Successfully processed message for resource {resource_id}"
+                f"[CHAT_SERVICE] Successfully processed message"
             )
             print(f"[CHAT_SERVICE] Generated response length: {len(answer)} characters")
 
             return {
                 "answer": answer,
                 "thread_id": thread_id or "default",
-                "resource_id": str(resource_id),
+                "sender": sender,
             }
 
         except Exception as e:
             print(
-                f"[CHAT_SERVICE] Failed to process chat message for resource {resource_id}: {str(e)}"
+                f"[CHAT_SERVICE] Failed to process chat message: {str(e)}"
             )
             raise RuntimeError(f"Failed to process chat message: {str(e)}")
