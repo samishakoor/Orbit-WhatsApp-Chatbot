@@ -1,5 +1,5 @@
 """
-Conversation model for managing RAG chat sessions.
+Conversation model for managing chat sessions.
 
 This model stores conversation metadata only. LangGraph's PostgreSQL checkpointer
 handles the actual message persistence automatically using thread_id.
@@ -13,7 +13,7 @@ from app.models.base import BaseModel
 
 class Conversation(BaseModel):
     """
-    Conversation model for RAG chat sessions.
+    Conversation model for chat sessions.
 
     Stores only business metadata - LangGraph handles message persistence
     via PostgreSQL checkpointer using thread_id as the key.

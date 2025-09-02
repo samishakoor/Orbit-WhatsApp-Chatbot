@@ -1,5 +1,5 @@
 """
-Chat service for AI chat operations and streaming.
+Chat service for AI chat operations.
 
 This service handles chat functionality with conversation
 persistence using LangGraph workflows.
@@ -40,7 +40,7 @@ class ChatService:
 
         Args:
             resource_id: Resource UUID
-            async_mode: If True, create async workflow for streaming
+            async_mode: If True, create async workflow
 
         Returns:
             Compiled LangGraph workflow
@@ -71,7 +71,7 @@ class ChatService:
         self, message: str, thread_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Send a chat message and get AI response using RAG workflow.
+        Send a chat message and get AI response using Chat Workflow.
 
         Args:
             resource_id: Resource UUID
@@ -108,7 +108,7 @@ class ChatService:
             logger.info(f"[CHAT_SERVICE] Config: {config}")
 
             # Get async workflow for regular chat (consistent with ainvoke)
-            workflow = await self._get_workflow(async_mode=True)
+            workflow = await self._get_workflow(async_mode=False) # since we are not streaming responses, we use sync mode
 
             # Execute workflow
             logger.info(f"[CHAT_SERVICE] Executing async workflow")

@@ -1,15 +1,5 @@
-"""
-AI module for document processing and RAG functionality.
-
-This module provides:
-- Document processing workflows (PDF, DOCX, Excel, Text)
-- Vector embeddings and storage
-- RAG-based chat functionality
-- LangGraph workflow management
-"""
-
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 
 class AILogger:
