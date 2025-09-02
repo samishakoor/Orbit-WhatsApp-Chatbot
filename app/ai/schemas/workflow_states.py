@@ -14,5 +14,4 @@ class ChatState(BaseModel):
     """
     messages: Annotated[Sequence[BaseMessage], add_messages]
     current_message: Message
-    answer: str
     

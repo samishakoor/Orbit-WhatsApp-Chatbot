@@ -46,7 +46,7 @@ class ChatService:
             Compiled LangGraph workflow
         """
         try:
-            print(
+            logger.info(
                 f"[CHAT_SERVICE] Creating {'async' if async_mode else 'sync'} workflow"
             )
 
@@ -60,11 +60,11 @@ class ChatService:
                 async_mode=async_mode,  # Use proper async/sync mode
             )
 
-            print(f"[CHAT_SERVICE] Chat Workflow created successfully")
+            logger.info(f"[CHAT_SERVICE] Chat Workflow created successfully")
             return workflow
 
         except Exception as e:
-            print(f"[CHAT_SERVICE] Failed to create chat workflow: {str(e)}")
+            logger.error(f"[CHAT_SERVICE] Failed to create chat workflow: {str(e)}")
             raise RuntimeError(f"Failed to create chat workflow: {str(e)}")
 
     async def send_message(
@@ -86,7 +86,7 @@ class ChatService:
         """
         try:
 
-            print(
+            logger.info(
                 f"[CHAT_SERVICE] Processing chat message for thread {thread_id}"
             )
 
@@ -97,24 +97,23 @@ class ChatService:
             }
 
             # Debug: Log what we're preparing
-            print(f"[CHAT_SERVICE] Input data: {input_data}")
+            logger.info(f"[CHAT_SERVICE] Input data: {input_data}")
 
             # Validate input
             validated_input = validate_chat_input(input_data)
             config = prepare_chat_config(thread_id or "default")
 
             # Debug: Log what we're passing to the workflow
-            print(f"[CHAT_SERVICE] Validated input: {validated_input}")
-            print(f"[CHAT_SERVICE] Config: {config}")
+            logger.info(f"[CHAT_SERVICE] Validated input: {validated_input}")
+            logger.info(f"[CHAT_SERVICE] Config: {config}")
 
             # Get async workflow for regular chat (consistent with ainvoke)
             workflow = await self._get_workflow(async_mode=True)
 
             # Execute workflow
-            print(f"[CHAT_SERVICE] Executing async workflow")
+            logger.info(f"[CHAT_SERVICE] Executing async workflow")
             result = await workflow.ainvoke(validated_input, config=config)
             # Extract response
-            answer = result.get("answer", "")
             messages = result.get("messages", [])
 
             # Get AI message from result
@@ -126,12 +125,12 @@ class ChatService:
                         break
 
             if not ai_message:
-                ai_message = AIMessage(content=answer)
+                ai_message = ""
 
-            print(
+            logger.info(
                 f"[CHAT_SERVICE] Successfully processed message"
             )
-            print(f"[CHAT_SERVICE] Generated response length: {len(answer)} characters")
+            logger.info(f"[CHAT_SERVICE] Generated response length: {len(ai_message)} characters")
 
             return {
                 "ai_message": ai_message,
@@ -139,7 +138,7 @@ class ChatService:
             }
 
         except Exception as e:
-            print(
+            logger.error(
                 f"[CHAT_SERVICE] Failed to process chat message: {str(e)}"
             )
             raise RuntimeError(f"Failed to process chat message: {str(e)}")

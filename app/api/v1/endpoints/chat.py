@@ -38,37 +38,6 @@ async def verify_whatsapp(
     raise HTTPException(status_code=403, detail="Invalid verification token")
 
 
-def send_whatsapp_message(to, message, template=False):
-    print("Sending WhatsApp message to", to)
-    print("Message:", message)
-    url = (
-        f"https://graph.facebook.com/v22.0/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
-    )
-    headers = {
-        "Authorization": f"Bearer " + settings.WHATSAPP_API_KEY,
-        "Content-Type": "application/json",
-    }
-    if not template:
-        data = {
-            "messaging_product": "whatsapp",
-            "preview_url": False,
-            "recipient_type": "individual",
-            "to": to,
-            "type": "text",
-            "text": {"body": message},
-        }
-    else:
-        data = {
-            "messaging_product": "whatsapp",
-            "to": to,
-            "type": "template",
-            "template": {"name": "hello_world", "language": {"code": "en_US"}},
-        }
-
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    return response.json()
-
-
 @router.post("/", status_code=200, response_model=StatusResponse)
 async def receive_whatsapp_message(
     current_sender: Annotated[str, Depends(get_message_sender)],
@@ -87,13 +56,9 @@ async def receive_whatsapp_message(
         )
 
     if message:
-        logger.info(
-            f"[CHAT_ENDPOINT] Received message from user {current_sender}"
-        )
-        
-        logger.info(
-            f"[CHAT_ENDPOINT] Message Payload: {message}"
-        )
+        logger.info(f"[CHAT_ENDPOINT] Received message from user {current_sender}")
+
+        logger.info(f"[CHAT_ENDPOINT] Message Payload: {message}")
 
         # Step 1: Get or create conversation through business service
         conversation = conversation_service.get_or_create_conversation(
