@@ -71,7 +71,7 @@ class ChatService:
         self, message: str, thread_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Send a chat message and get AI response using Chat Workflow.
+        Send a chat message and get AI response using chat workflow.
 
         Args:
             resource_id: Resource UUID
@@ -107,12 +107,12 @@ class ChatService:
             logger.info(f"[CHAT_SERVICE] Validated input: {validated_input}")
             logger.info(f"[CHAT_SERVICE] Config: {config}")
 
-            # Get sync workflow for regular chat (consistent with invoke)
-            workflow = await self._get_workflow(async_mode=False) # since we are not streaming responses, we use sync mode
+            # Get async workflow for regular chat (consistent with ainvoke)
+            workflow = await self._get_workflow(async_mode=True)
 
             # Execute workflow
-            logger.info(f"[CHAT_SERVICE] Executing sync workflow")
-            result = await workflow.invoke(validated_input, config=config)
+            logger.info(f"[CHAT_SERVICE] Executing async workflow")
+            result = await workflow.ainvoke(validated_input, config=config)
             # Extract response
             messages = result.get("messages", [])
 
