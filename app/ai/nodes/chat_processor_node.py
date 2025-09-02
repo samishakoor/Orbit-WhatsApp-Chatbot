@@ -22,8 +22,11 @@ def chat_processor_node(state: ChatState) -> ChatState:
         )
     ]
 
-    messages = system_message + state["messages"]
+    messages = system_message + state.messages
     logger.info(f"Input message given to LLM: {messages[-1].content}")
     response = llm.invoke(messages)
     logger.info(f"Response from LLM: {response.content}")
-    return {"messages": [response]}
+
+    # Add the AI response to the messages
+    state.messages.append(response)
+    return state

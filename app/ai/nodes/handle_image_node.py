@@ -30,7 +30,7 @@ def handle_image_node(state: ChatState) -> ChatState:
     """Node that handles image messages."""
 
     logger.info(f"Started processing image message")
-    image_data = state["current_message"].image
+    image_data = state.current_message.image
     image_base64 = get_base64_image(image_data)
 
     image_messages = []
@@ -55,5 +55,5 @@ def handle_image_node(state: ChatState) -> ChatState:
 
     logger.info(f"Image Message Received From User: {image_messages}")
 
-    state["messages"].append(HumanMessage(content=image_messages))
+    state.messages.append(HumanMessage(content=image_messages))
     return state
