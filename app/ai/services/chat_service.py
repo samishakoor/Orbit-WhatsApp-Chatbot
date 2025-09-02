@@ -40,7 +40,7 @@ class ChatService:
 
         Args:
             resource_id: Resource UUID
-            async_mode: If True, create async workflow
+            async_mode: If True, create async workflow for streaming
 
         Returns:
             Compiled LangGraph workflow
@@ -107,12 +107,12 @@ class ChatService:
             logger.info(f"[CHAT_SERVICE] Validated input: {validated_input}")
             logger.info(f"[CHAT_SERVICE] Config: {config}")
 
-            # Get async workflow for regular chat (consistent with ainvoke)
+            # Get sync workflow for regular chat (consistent with invoke)
             workflow = await self._get_workflow(async_mode=False) # since we are not streaming responses, we use sync mode
 
             # Execute workflow
-            logger.info(f"[CHAT_SERVICE] Executing async workflow")
-            result = await workflow.ainvoke(validated_input, config=config)
+            logger.info(f"[CHAT_SERVICE] Executing sync workflow")
+            result = await workflow.invoke(validated_input, config=config)
             # Extract response
             messages = result.get("messages", [])
 
