@@ -128,7 +128,7 @@ def validate_chat_input(input_data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Prepare state with current message
     state = {
-        "current_message": Message(**message),
+        "current_message": message,
         "messages": [],
     }
 

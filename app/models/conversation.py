@@ -41,15 +41,15 @@ class Conversation(BaseModel):
     is_active = Column(Boolean, default=True)  # For archiving conversations
 
     def __repr__(self):
-        return f"<Conversation(id={self.id}, thread_id='{self.thread_id}', project_id={self.project_id})>"
+        return f"<Conversation(id={self.id}, thread_id='{self.thread_id}', sender_id={self.sender_id})>"
 
     @classmethod
     def generate_thread_id(cls, sender_id: str) -> str:
         """
         Generate unique thread ID for LangGraph.
 
-        Format: project_{project_id}_user_{user_id}_{timestamp}
-        This ensures thread isolation per project-user combination.
+        Format: user_{sender_id}_{timestamp}
+        This ensures thread isolation per user.
         """
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
         return f"user_{sender_id}_{timestamp}"
