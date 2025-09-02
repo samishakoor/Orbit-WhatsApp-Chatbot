@@ -108,9 +108,7 @@ def setup_logging():
         # AI module loggers - detailed logging
         "app.ai": logging.INFO,
         "app.ai.services": logging.INFO,
-        "app.ai.chains": logging.INFO,
         "app.ai.nodes": logging.INFO,
-        "app.ai.tools": logging.INFO,
         "app.ai.workflows": logging.INFO,
 
         # Core application loggers
@@ -132,10 +130,6 @@ def setup_logging():
         # Vector database
         "langchain_postgres": logging.WARNING,
         "psycopg": logging.WARNING,
-
-        # Google Cloud
-        "google": logging.WARNING,
-        "google.cloud": logging.WARNING,
     }
 
     # Apply logger configurations

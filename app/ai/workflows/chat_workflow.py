@@ -25,7 +25,7 @@ async def create_chat_workflow(
     async_mode: bool = False,
 ) -> StateGraph:
     """
-    Create RAG chat workflow for resource-specific document querying.
+    Create chat workflow for chat functionality.
 
     Uses proper PostgreSQL checkpointer context manager pattern.
     """
@@ -80,9 +80,9 @@ async def create_chat_workflow(
 
     # Create checkpointer based on mode
     if async_mode:
-        logger.info("[CHAT_WORKFLOW] Using async checkpointer for streaming")
+        logger.info("[CHAT_WORKFLOW] Using async checkpointer")
     else:
-        logger.info("[CHAT_WORKFLOW] Using sync checkpointer for regular execution")
+        logger.info("[CHAT_WORKFLOW] Using sync checkpointer")
 
     checkpointer = await checkpointer_service.create_checkpointer(async_mode)
 
@@ -141,7 +141,7 @@ def validate_chat_input(input_data: Dict[str, Any]) -> Dict[str, Any]:
 
 def prepare_chat_config(thread_id: str) -> Dict[str, Any]:
     """
-    Prepare configuration for RAG chat workflow execution.
+    Prepare configuration for chat workflow execution.
 
     Args:
         thread_id: Thread identifier for conversation persistence
