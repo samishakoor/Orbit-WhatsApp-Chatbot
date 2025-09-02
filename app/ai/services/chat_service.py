@@ -68,7 +68,7 @@ class ChatService:
             raise RuntimeError(f"Failed to create chat workflow: {str(e)}")
 
     async def send_message(
-        self, message: str, sender: str, thread_id: Optional[str] = None
+        self, message: str, thread_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Send a chat message and get AI response using RAG workflow.
@@ -87,13 +87,12 @@ class ChatService:
         try:
 
             print(
-                f"[CHAT_SERVICE] Processing chat message for sender {sender} and thread {thread_id}"
+                f"[CHAT_SERVICE] Processing chat message for thread {thread_id}"
             )
 
             # Prepare workflow input
             input_data = {
                 "message": message,
-                "sender": sender,
                 "thread_id": thread_id or "default",
             }
 
@@ -135,9 +134,8 @@ class ChatService:
             print(f"[CHAT_SERVICE] Generated response length: {len(answer)} characters")
 
             return {
-                "answer": answer,
+                "ai_message": ai_message,
                 "thread_id": thread_id or "default",
-                "sender": sender,
             }
 
         except Exception as e:

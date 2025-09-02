@@ -80,34 +80,23 @@ def validate_chat_input(input_data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Extract required fields
     message = input_data.get("message", "")
-    sender = input_data.get("sender", "")
     thread_id = input_data.get("thread_id", "default")
 
     if not message:
         raise ValueError("Message is required")
 
-    if not sender:
+    if not message.from_:
         raise ValueError("Sender is required")
 
-    # Create human message for the current input
-    human_message = {"role": "user", "content": message}
-
     # Prepare state with current message
-    # LangGraph's checkpointer will automatically:
-    # 1. Retrieve existing conversation state using thread_id
-    # 2. Append this new message to the existing messages (thanks to add_messages annotation)
-    # 3. Pass the complete conversation history to the workflow
     state = {
-        # This will be appended to existing messages
-        "messages": [human_message],
-        "sender": sender,
-        "answer": "",  # Initialize empty answer
+        "current_message": message,
+        "answer": "",
     }
 
     print(
-        f"[CHAT_WORKFLOW] Prepared input state with {len(state['messages'])} messages for sender: {sender}, thread_id: {thread_id}"
+        f"[CHAT_WORKFLOW] Prepared input state with current message for thread_id: {thread_id}"
     )
-    print(f"[CHAT_WORKFLOW] Human message content: {human_message['content'][:50]}...")
 
     return state
 

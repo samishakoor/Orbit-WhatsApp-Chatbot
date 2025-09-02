@@ -88,7 +88,11 @@ async def receive_whatsapp_message(
 
     if message:
         logger.info(
-            f"[CHAT_ENDPOINT] Received message from user {current_sender}: {message}"
+            f"[CHAT_ENDPOINT] Received message from user {current_sender}"
+        )
+        
+        logger.info(
+            f"[CHAT_ENDPOINT] Message Payload: {message}"
         )
 
         # Step 1: Get or create conversation through business service
@@ -99,7 +103,6 @@ async def receive_whatsapp_message(
         # Step 2: Send message through AI service
         await chat_service.send_message(
             message=message,
-            sender=current_sender,
             thread_id=conversation.thread_id,
         )
 
