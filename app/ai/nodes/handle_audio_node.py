@@ -41,10 +41,12 @@ def transcribe_audio(audio: Audio) -> str:
 def handle_audio_node(state: ChatState) -> ChatState:
     """Node that handles audio messages."""
     logger.info(f"Started processing audio message")
-    transcribed_audio_message = transcribe_audio(state["current_message"].audio)
-    logger.info(f"Transcribed Audio Message Received From User: {transcribed_audio_message}")
+    transcribed_audio_message = transcribe_audio(state.current_message.audio)
+    logger.info(
+        f"Transcribed Audio Message Received From User: {transcribed_audio_message}"
+    )
     if isinstance(transcribed_audio_message, str):
-        state["messages"].append(HumanMessage(content=transcribed_audio_message))
+        state.messages.append(HumanMessage(content=transcribed_audio_message))
         return state
     else:
         logger.error(f"❌ Error transcribing audio message: {response}")
