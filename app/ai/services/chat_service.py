@@ -121,7 +121,7 @@ class ChatService:
             if messages:
                 for msg in reversed(messages):
                     if isinstance(msg, AIMessage):
-                        ai_message = msg
+                        ai_message = msg.content
                         break
 
             if not ai_message:
