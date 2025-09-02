@@ -1,7 +1,6 @@
-import json
 import logging
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Query, requests, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.ai.dependencies import ChatServiceDep
 from app.core.dependencies import (
     get_conversation_service,
