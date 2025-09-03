@@ -83,10 +83,7 @@ async def create_chat_workflow(
     else:
         logger.info("[CHAT_WORKFLOW] Using sync checkpointer")
 
-    # checkpointer = await checkpointer_service.create_checkpointer(async_mode)
-    checkpointer = (
-        checkpointer_service._create_memory_checkpointer()
-    )  # memory checkpointer is used due to limited postgresql space in Render
+    checkpointer = await checkpointer_service.create_checkpointer(async_mode)
 
     # Log checkpointer type
     checkpointer_type = checkpointer_service.get_checkpointer_type(checkpointer)
