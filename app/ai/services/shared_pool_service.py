@@ -63,7 +63,9 @@ async def get_shared_async_pool() -> AsyncConnectionPool:
             # Open the pool to establish connections - CRITICAL for proper operation
             logger.info(f"[SHARED_POOL_SERVICE] Opening AsyncConnectionPool...")
             await _shared_async_pool.open()
-            logger.info(f"[SHARED_POOL_SERVICE] AsyncConnectionPool opened successfully")
+            logger.info(
+                f"[SHARED_POOL_SERVICE] AsyncConnectionPool opened successfully"
+            )
 
         except Exception as e:
             logger.error(
