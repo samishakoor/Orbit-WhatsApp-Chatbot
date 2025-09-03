@@ -15,7 +15,6 @@ from app.ai.nodes.handle_image_node import handle_image_node
 from app.ai.nodes.handle_audio_node import handle_audio_node
 from app.ai.nodes.handle_text_node import handle_text_node
 from app.ai.nodes.send_whatsapp_message_node import send_whatsapp_message_node
-from app.schemas.chat import Message
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +84,9 @@ async def create_chat_workflow(
         logger.info("[CHAT_WORKFLOW] Using sync checkpointer")
 
     # checkpointer = await checkpointer_service.create_checkpointer(async_mode)
-    checkpointer = checkpointer_service._create_memory_checkpointer() # memory checkpointer is used due to limited postgresql space in Render
+    checkpointer = (
+        checkpointer_service._create_memory_checkpointer()
+    )  # memory checkpointer is used due to limited postgresql space in Render
 
     # Log checkpointer type
     checkpointer_type = checkpointer_service.get_checkpointer_type(checkpointer)
