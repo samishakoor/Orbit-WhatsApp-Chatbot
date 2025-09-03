@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     # OpenAI
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
     OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    
+    # Chat Configuration
+    MAX_MESSAGES_IN_CONTEXT: int = int(os.getenv("MAX_MESSAGES_IN_CONTEXT", "10"))
 
     # WhatsApp
     WHATSAPP_API_KEY: str = os.getenv("WHATSAPP_API_KEY")
@@ -58,16 +61,18 @@ def setup_logging():
     """Configure beautiful colored logging with Rich."""
 
     # Create custom theme for log levels
-    custom_theme = Theme({
-        "logging.level.debug": "yellow",
-        "logging.level.info": "green",
-        "logging.level.warning": "orange3",
-        "logging.level.error": "red",
-        "logging.level.critical": "bold red",
-        "logging.keyword": "cyan",
-        "logging.string": "magenta",
-        "logging.number": "bright_blue"
-    })
+    custom_theme = Theme(
+        {
+            "logging.level.debug": "yellow",
+            "logging.level.info": "green",
+            "logging.level.warning": "orange3",
+            "logging.level.error": "red",
+            "logging.level.critical": "bold red",
+            "logging.keyword": "cyan",
+            "logging.string": "magenta",
+            "logging.number": "bright_blue",
+        }
+    )
 
     # Create console with custom theme
     console = Console(theme=custom_theme, force_terminal=True)
@@ -84,14 +89,13 @@ def setup_logging():
         tracebacks_show_locals=True,
         locals_max_length=10,
         locals_max_string=80,
-        keywords=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"]
+        keywords=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"],
     )
 
     # Configure rich handler format
-    rich_handler.setFormatter(logging.Formatter(
-        fmt="[%(name)s] %(message)s",
-        datefmt="[%X]"
-    ))
+    rich_handler.setFormatter(
+        logging.Formatter(fmt="[%(name)s] %(message)s", datefmt="[%X]")
+    )
 
     # Set up root logger
     root_logger = logging.getLogger()
@@ -110,12 +114,10 @@ def setup_logging():
         "app.ai.services": logging.INFO,
         "app.ai.nodes": logging.INFO,
         "app.ai.workflows": logging.INFO,
-
         # Core application loggers
         "app.services": logging.INFO,
         "app.api": logging.INFO,
         "app.core": logging.INFO,
-
         # Third-party libraries - less verbose
         "langchain": logging.WARNING,
         "openai": logging.WARNING,
@@ -126,7 +128,6 @@ def setup_logging():
         "uvicorn": logging.INFO,
         "uvicorn.access": logging.WARNING,  # Reduce HTTP request spam
         "fastapi": logging.INFO,
-
         # Vector database
         "langchain_postgres": logging.WARNING,
         "psycopg": logging.WARNING,
@@ -140,9 +141,8 @@ def setup_logging():
 
     # Log the setup completion
     setup_logger = logging.getLogger("app.core.config")
+    setup_logger.info("🎨 [bold green]Rich colored logging configured![/bold green]")
+    setup_logger.info(f"📊 Log level: [bold cyan]{settings.LOG_LEVEL}[/bold cyan]")
     setup_logger.info(
-        "🎨 [bold green]Rich colored logging configured![/bold green]")
-    setup_logger.info(
-        f"📊 Log level: [bold cyan]{settings.LOG_LEVEL}[/bold cyan]")
-    setup_logger.info(
-        f"🔧 Environment: [bold yellow]{settings.ENVIRONMENT}[/bold yellow]")
+        f"🔧 Environment: [bold yellow]{settings.ENVIRONMENT}[/bold yellow]"
+    )
